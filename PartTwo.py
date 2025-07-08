@@ -1,6 +1,8 @@
 import pandas as pd
 from pathlib import Path # to use Path for file paths
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+
 
 
 def load_and_filter_data(path=Path.cwd() / "hansard40000.csv"):
@@ -36,11 +38,37 @@ def load_and_filter_data(path=Path.cwd() / "hansard40000.csv"):
     return df
 
 
+    
+def vectorise_speeches(df):
+    """
+    Vectorizes the speeches in the DataFrame using TF-IDF.
+    Returns a DataFrame with the TF-IDF vectors.
+    """
+    vectorizer = TfidfVectorizer(stop_words='english', max_features=3000)
+    tfidf_matrix = vectorizer.fit_transform(df['speech'])
+    
+    X = vectorizer.fit_transform(df['speech'])
+    y = df['party']  # Predict party variable
+    
+    # Train and test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=0.33,
+        stratify=y,
+        random_state=26
+    )
+    return X_train, X_test, y_train, y_test, vectorizer
+   
+
+
 
 
 if __name__ == "__main__":
     """
     uncomment the following lines to run the functions once you have completed them
     """
-    load_and_filter_data()
+    df = load_and_filter_data()
+    X_train, X_test, y_train, y_test, vectorizer = vectorise_speeches(df)
+    print(vectorizer)
+     
     
