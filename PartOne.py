@@ -27,6 +27,35 @@ def fk_level(text, d):
     Returns:
         float: The Flesch-Kincaid Grade Level of the text. (higher grade is more difficult)
     """
+    
+    # Calculate total words
+    tokens = nltk.tokenize.word_tokenize(text.lower())
+    new_tokens = [word for word in tokens if word.isalpha()]
+
+    num_tokens = len(new_tokens)
+
+    print(f"Number of tokens: {num_tokens}")
+
+    # Calculate total sentences
+
+    sentences = nltk.tokenize.sent_tokenize(text)
+    num_sentences = len(sentences)
+    print(f"Number of sentences: {num_sentences}")
+
+    # Calculate total syllables
+    total_syl = 0
+    for token in new_tokens:
+        total_syl = total_syl + count_syl(token, d)
+
+    print(f"Number of syllables: {total_syl}")
+
+    # Flesch-Kincaid Grade Level = 0.39 × ( Total Words / Total Sentences ) + 11.8 × ( Total Syllables / Total Words ) − 15.59
+
+    fk = 0.39 * (num_tokens / num_sentences) + 11.8 * (total_syl /
+                                                       num_tokens) - 15.59
+    print(f"Flesch-Kincaid Grade Level: {fk}")
+
+    return fk
     pass
 
 
@@ -41,6 +70,36 @@ def count_syl(word, d):
     Returns:
         int: The number of syllables in the word.
     """
+
+    total = 0
+
+    if word in d:
+        syllables = d[word]
+        for syl in syllables[0]:
+            if any(c.isdigit() for c in syl):
+                total = total + 1
+
+        return total
+    else:
+        total = estimate_syllables(word)
+        #print(f"Word not in dictionary: {word}, estimated as {total}")
+        return total
+    pass
+
+
+def estimate_syllables(word):
+    count = 0
+    vowels = "aeiouy"
+    if word[0] in vowels:
+        count += 1
+    for index in range(1, len(word)):
+        if word[index] in vowels and word[index - 1] not in vowels:
+            count += 1
+            if word.endswith("e"):
+                count -= 1
+    if count == 0:
+        count += 1
+    return count
     pass
 
 def read_novels(path=Path.cwd() / "novels"):
@@ -161,11 +220,11 @@ if __name__ == "__main__":
     print(path)
     df = read_novels(path) # this line will fail until you have completed the read_novels function above.
     print(df.head())
-    #nltk.download("cmudict")
+    nltk.download("cmudict")
     #parse(df)
     #print(df.head())
     print(get_ttrs(df))
-    #print(get_fks(df))
+    print(get_fks(df))
     #df = pd.read_pickle(Path.cwd() / "pickles" /"name.pickle")
     # print(adjective_counts(df))
     """ 
