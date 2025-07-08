@@ -151,6 +151,26 @@ def read_novels(path=Path.cwd() / "novels"):
 def parse(df, store_path=Path.cwd() / "pickles", out_name="parsed.pickle"):
     """Parses the text of a DataFrame using spaCy, stores the parsed docs as a column and writes 
     the resulting  DataFrame to a pickle file"""
+
+    # Generate spacy Doc objects for each book
+    docs = []
+    for book in df["text"]:
+        doc = nlp(book)
+        print("tokenised book")
+        #doc = "empty"
+        docs.append(doc)
+
+    # Put them in a new column and add it to the dataframe
+    new_column = {'parsed': docs}
+    #print(new_column)
+    df = df.assign(**new_column)
+    print(df)
+
+    # Write/serialse dataframe to pickle file format
+    df.to_pickle(f"{store_path}/{out_name}")
+
+    # Return datatframe
+    return df
     pass
 
 
@@ -221,11 +241,11 @@ if __name__ == "__main__":
     df = read_novels(path) # this line will fail until you have completed the read_novels function above.
     print(df.head())
     nltk.download("cmudict")
-    #parse(df)
+    parse(df)
     #print(df.head())
     print(get_ttrs(df))
     print(get_fks(df))
-    #df = pd.read_pickle(Path.cwd() / "pickles" /"name.pickle")
+    df = pd.read_pickle(Path.cwd() / "pickles" /"parsed.pickle")
     # print(adjective_counts(df))
     """ 
     for i, row in df.iterrows():
