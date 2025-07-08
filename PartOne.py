@@ -1,11 +1,15 @@
 #Re-assessment template 2025
 
 # Note: The template functions here and the dataframe format for structuring your solution is a suggested but not mandatory approach. You can use a different approach if you like, as long as you clearly answer the questions and communicate your answers clearly.
+import os   # to use os.path.join
+import glob  # to use glob.glob
 
-import nltk
-import spacy
-from pathlib import Path
+import nltk  # to use nltk.corpus.cmudict
+nltk.download("punkt_tab")  # to download the punkt tokenizer
+import spacy  # to use spacy for text processing
+from pathlib import Path  # to use Path for file paths
 
+import pandas as pd  # to use pandas for dataframes
 
 nlp = spacy.load("en_core_web_sm")
 nlp.max_length = 2000000
@@ -39,10 +43,49 @@ def count_syl(word, d):
     """
     pass
 
-
-def read_novels(path=Path.cwd() / "texts" / "novels"):
+def read_novels(path=Path.cwd() / "novels"):
     """Reads texts from a directory of .txt files and returns a DataFrame with the text, title,
     author, and year"""
+    
+    data = []
+
+    for file in path.glob("*.txt"):
+        parts = file.stem.split("-") 
+
+
+        title = parts[0]
+        author = parts[1]
+        year = parts[2]
+
+        year = year.split(".")
+        year = year[0]
+
+        title = title.replace("_", " ")
+
+        # Read file from the filename
+        file = open(file, "r", encoding='utf-8')
+        text = file.read()
+
+        # Add this record to the list
+        data.append([text, title, author, year])
+
+    df = pd.DataFrame(data)
+
+    # Add the titles to the columns ["text", "title", "author", "year"]
+    names = ["text", "title", "author", "year"]
+    df.rename(columns={
+        0: 'text',
+        1: 'title',
+        2: 'author',
+        3: 'year'
+    },
+              inplace=True)
+
+    # Sort data by year
+    df = df.sort_values(by='year', ascending=False)
+    #print(df)
+
+    return df
     pass
 
 
@@ -54,8 +97,7 @@ def parse(df, store_path=Path.cwd() / "pickles", out_name="parsed.pickle"):
 
 def nltk_ttr(text):
     """Calculates the type-token ratio of a text. Text is tokenized using nltk.word_tokenize."""
-    pass
-
+   
 
 def get_ttrs(df):
     """helper function to add ttr to a dataframe"""
@@ -96,10 +138,10 @@ if __name__ == "__main__":
     """
     uncomment the following lines to run the functions once you have completed them
     """
-    #path = Path.cwd() / "p1-texts" / "novels"
-    #print(path)
-    #df = read_novels(path) # this line will fail until you have completed the read_novels function above.
-    #print(df.head())
+    path = Path.cwd()/ "novels"
+    print(path)
+    df = read_novels(path) # this line will fail until you have completed the read_novels function above.
+    print(df.head())
     #nltk.download("cmudict")
     #parse(df)
     #print(df.head())
