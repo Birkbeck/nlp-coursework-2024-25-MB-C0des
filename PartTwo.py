@@ -100,6 +100,7 @@ def vectorise_speeches_ngrams(df):
     return Xn_train, Xn_test, yn_train, yn_test, vectorizer
 
 
+
 if __name__ == "__main__":
     """
     uncomment the following lines to run the functions once you have completed them
