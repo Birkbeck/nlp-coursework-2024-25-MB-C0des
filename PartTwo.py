@@ -3,6 +3,10 @@ from pathlib import Path # to use Path for file paths
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+from sklearn.metrics import f1_score, classification_report
+
 
 
 def load_and_filter_data(path=Path.cwd() / "hansard40000.csv"):
@@ -59,8 +63,41 @@ def vectorise_speeches(df):
     )
     return X_train, X_test, y_train, y_test, vectorizer
    
+def train_and_test(X_train, X_test, y_train, y_test):
+        
+    rf = RandomForestClassifier(n_estimators = 3000) # Random Forest Classifier
+    rf.fit(X_train, y_train)
+    y_pred_rf = rf.predict(X_test)
+    macro_f1_rf = f1_score(y_test, y_pred_rf, average="macro")
+    print(f"The Random Forest macro average F1 score: {macro_f1_rf:.4f}")
+    print(classification_report(y_test, y_pred_rf))
+    
+    
+    svm = SVC(kernel='linear')   # Linear SVM Classifier
+    svm.fit(X_train, y_train)
+    y_pred_svm = svm.predict(X_test)
+    macro_f1_svm = f1_score(y_test, y_pred_svm, average="macro")
+    print(f"The Linear SVM macro average F1 score: {macro_f1_svm:.4f}")
+    print(classification_report(y_test, y_pred_svm))
 
 
+def vectorise_speeches_ngrams(df):
+
+    # Train and test with n-grams in range (1, 3)
+    # This is the same as the vectorise_speeches function but with n-grams
+    vectorizer_ngrams = TfidfVectorizer(stop_words='english', max_features=3000, ngram_range=(1, 3))
+    X_ngram = vectorizer_ngrams.fit_transform(df['speech'])
+    y = df['party']
+
+    X_ngram = vectorizer_ngrams.fit_transform(df["speech"])
+    y = df["party"]
+    Xn_train, Xn_test, yn_train, yn_test = train_test_split(
+        X_ngram, y,
+        test_size=0.33,
+        stratify=y,
+        random_state=26
+    )
+    return Xn_train, Xn_test, yn_train, yn_test, vectorizer
 
 
 if __name__ == "__main__":
@@ -71,4 +108,13 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test, vectorizer = vectorise_speeches(df)
     print(vectorizer)
      
+    train_and_test(X_train, X_test, y_train, y_test)
+
+
+    
+
+    Xn_train, Xn_test, yn_train, yn_test, vectorizer = vectorise_speeches_ngrams(df)
+    print(vectorizer)
+     
+    train_and_test(Xn_train, Xn_test, yn_train, yn_test)
     
