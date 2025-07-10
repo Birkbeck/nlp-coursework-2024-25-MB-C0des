@@ -1,1 +1,17 @@
-Answers to the text questions go here.
+1(d)
+The F-K score assumes that syllable complexity and sentence length are the major indicators of readability. This ignores the reader's cultural background and vocabulary familiarity which both impact comprehension. An example is that technical words within sentences can still be difficult to comprehend.
+The F-K score is based on surface features of English meaning it will not generalise well across different dialects. Dialects with elaborate syntax and stylistic conventions will inflate the score inaccurately. An example is that words in different dialects with elaborate syntax yet simple meaning have a high score.
+
+2(f)
+
+The custom tokeniser was implemented using spaCy and filters through stopwords , punctuation,  numbers and short words which hold minimal useful information in the context of speeches. 
+
+The custom tokeniser was used with TfidfVectorizer as implemented prior to train the Random Forest and SVM classifiers. 
+
+With the custom tokeniser:
+The Random Forest macro average F1 score: 0.4291 
+The Linear SVM macro average F1 score: 0.5875
+
+The linear SVM macro average was the highest at 0.5875 with the customer tokeniser thus boosting the classification performance. As the custom tokeniser removed stopwords, punctuation and short words this resulted in a sparse TF-ID matrix and well separated class boundaries which are ideal for the linear SVM.
+
+The Random Forest macro average F1 score was lowest at 0.4291 with the custom tokeniser. Random Forests unlike SVMs prefer denser and informative features. High dimensionality as with the 3000 features and the sparse TF-IDF matrix are not ideal for Random Forests.

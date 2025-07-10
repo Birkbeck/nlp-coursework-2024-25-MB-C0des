@@ -7,6 +7,15 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import f1_score, classification_report
 
+import nltk
+import spacy  # to use spacy for text processing        
+from nltk import ngrams  # to use ngrams for text processing
+from nltk.tokenize import word_tokenize  # to use word_tokenize for text processing
+from nltk.corpus import stopwords  # to use stopwords for text processing
+
+from sklearn.feature_extraction.text import CountVectorizer
+
+
 
 
 def load_and_filter_data(path=Path.cwd() / "hansard40000.csv"):
@@ -99,6 +108,42 @@ def vectorise_speeches_ngrams(df):
     )
     return Xn_train, Xn_test, yn_train, yn_test, vectorizer
 
+nlp = spacy.load("en_core_web_sm")
+
+def custom_spacy_tokeniser(text):
+    
+    doc = nlp(text)
+    # Return a list of tokens, excluding stop words, punctuation, numbers and short tokens
+    return [
+        token.lemma_.lower()
+        for token in doc
+        if token.is_alpha 
+        and not token.is_stop 
+        and not token.is_punct 
+        and not token.like_num
+        and len(token) >=4  
+    ]
+
+    
+
+
+def vectorise_speeches_custom(df):
+    # This is the same as the vectorise_speeches function but with a custom tokenizer
+    vectorizer_ngrams = TfidfVectorizer(tokenizer=custom_spacy_tokeniser, max_features=3000, token_pattern=None)
+    X_ngram = vectorizer_ngrams.fit_transform(df['speech'])
+    y = df['party']
+    
+    X = vectorizer_ngrams.fit_transform(df["speech"])
+    y = df["party"]
+    Xn_train, Xn_test, yn_train, yn_test = train_test_split(
+        X, y,
+        test_size=0.33,
+        stratify=y,
+        random_state=26
+    )
+    return Xn_train, Xn_test, yn_train, yn_test, vectorizer
+    
+
 
 
 if __name__ == "__main__":
@@ -119,3 +164,9 @@ if __name__ == "__main__":
      
     train_and_test(Xn_train, Xn_test, yn_train, yn_test)
     
+    
+   # Show results with custom tokenizer
+    X_train, X_test, y_train, y_test, vectorizer = vectorise_speeches_custom(df)
+    print(vectorizer)
+
+    train_and_test(X_train, X_test, y_train, y_test) 
